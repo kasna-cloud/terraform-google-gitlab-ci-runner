@@ -13,9 +13,10 @@ locals {
     "roles/compute.securityAdmin",
     "roles/monitoring.metricWriter"
   ], var.runner_additional_service_account_roles))
-  agent_iam_roles = [
-    "roles/iam.serviceAccountTokenCreator"
-  ]
+  agent_iam_roles = distinct(concat([
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/iam.workloadIdentityUser"
+  ], var.agent_additional_service_account_roles))
 }
 
 resource "google_project_iam_member" "this" {
