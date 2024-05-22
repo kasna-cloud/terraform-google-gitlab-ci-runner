@@ -15,3 +15,10 @@ resource "random_id" "this" {
 data "google_compute_network" "this" {
   name = var.network
 }
+
+data "google_compute_image" "cos_stable" {
+  count = var.runner_machine_image == "cos-stable" ? 1 : 0
+
+  family  = "cos-stable"
+  project = "cos-cloud"
+}

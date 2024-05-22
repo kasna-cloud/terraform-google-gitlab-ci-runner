@@ -54,7 +54,7 @@ locals {
       runners_enable_monitoring             = var.runners_enable_monitoring
       runners_network                       = var.network
       runners_subnetwork                    = var.subnetwork
-      runners_docker_machine_image          = var.runner_machine_image
+      runners_docker_machine_image          = var.runner_machine_image == "cos-stable" ? "cos-cloud/global/images/family/${data.google_compute_image.cos_stable[0].name}" : var.runner_machine_image
   })
 
   template_shutdown_script = templatefile("${path.module}/templates/shutdown-script.sh.tpl", {
@@ -114,4 +114,3 @@ locals {
     }
   )
 }
-

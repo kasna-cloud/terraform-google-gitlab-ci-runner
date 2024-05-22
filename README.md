@@ -1,6 +1,6 @@
 # GCP GitLab Runner
 
-This [Terraform](https://www.terraform.io/) modules creates a [GitLab CI runner](https://docs.gitlab.com/runner/). 
+This [Terraform](https://www.terraform.io/) modules creates a [GitLab CI runner](https://docs.gitlab.com/runner/).
 
 The runners created by the module use preemptible instances by default for running the builds using the `docker+machine` executor.
 
@@ -9,13 +9,13 @@ The runners created by the module use preemptible instances by default for runni
 
 The runner supports:
 
-### GitLab CI docker-machine runner 
+### GitLab CI docker-machine runner
 
-In this scenario the runner agent is running on a GCP Compute Instance and runners are created by [docker machine](https://docs.gitlab.com/runner/configuration/autoscale.html) using preemptible instances. Runners will scale automatically based on the configuration. The module creates a GCS cache by default, which is shared across runners (preemptible instances). 
+In this scenario the runner agent is running on a GCP Compute Instance and runners are created by [docker machine](https://docs.gitlab.com/runner/configuration/autoscale.html) using preemptible instances. Runners will scale automatically based on the configuration. The module creates a GCS cache by default, which is shared across runners (preemptible instances).
 
 ### GitLab CI docker runner
 
-In this scenario _not_ docker machine is used but docker to schedule the builds. Builds will run on the same compute instance as the agent. 
+In this scenario _not_ docker machine is used but docker to schedule the builds. Builds will run on the same compute instance as the agent.
 
 ### GitLab CI Kubernetes Runner
 
@@ -23,9 +23,9 @@ See [gke-runner](./modules/gke-runner)
 
 
 ## Autoscaling the Runners
-Both docker-machine runner and docker runners autoscale using GCP Custom metrics. The runner publishes running jobs metrics to stackdriver which is then used to scale up/down the number of active runners. `var.runners_min_replicas` and `var.runners_max_replicas` defined variables for the minimum and maximum number of runners respectively. It uses Google Managed Instance Group Autoscaler to scale when the average of running jobs exceeds `var.runners_concurrent`. 
+Both docker-machine runner and docker runners autoscale using GCP Custom metrics. The runner publishes running jobs metrics to stackdriver which is then used to scale up/down the number of active runners. `var.runners_min_replicas` and `var.runners_max_replicas` defined variables for the minimum and maximum number of runners respectively. It uses Google Managed Instance Group Autoscaler to scale when the average of running jobs exceeds `var.runners_concurrent`.
 
-> :warning: With scaling up and down, runners can get terminated without waiting for clean up when GCP scales down. GCP shutdown scripts have a maximum of atmost 90 seconds, during which it's forcefully terminated. Hence, it might not wait for your jobs to finish during scale down. This can leave orphan docker-machine-created instances and failed jobs. Use this with caution. 
+> :warning: With scaling up and down, runners can get terminated without waiting for clean up when GCP scales down. GCP shutdown scripts have a maximum of atmost 90 seconds, during which it's forcefully terminated. Hence, it might not wait for your jobs to finish during scale down. This can leave orphan docker-machine-created instances and failed jobs. Use this with caution.
 > Advisably, if you need more than one runner, set `var.runner_min_replicas` = `var.runners_max_replicas` = `number of runners you need`.
 
 ### GitLab runner token configuration
@@ -87,14 +87,15 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | >= 3.40 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | 4.19.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.1.3 |
+| <a name="provider_google"></a> [google](#provider\_google) | 5.30.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.6.2 |
 
 ## Modules
 
@@ -115,6 +116,7 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 | [google_compute_region_autoscaler.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_autoscaler) | resource |
 | [google_compute_region_instance_group_manager.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_group_manager) | resource |
 | [google_monitoring_metric_descriptor.jobs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/monitoring_metric_descriptor) | resource |
+| [google_project_iam_member.agent](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_project_iam_member.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_service_account.agent](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account.runner](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
@@ -122,6 +124,7 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 | [google_service_account_key.agent](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_key) | resource |
 | [random_id.this](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 | [random_shuffle.zones](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/shuffle) | resource |
+| [google_compute_image.cos_stable](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image) | data source |
 | [google_compute_network.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) | data source |
 | [google_compute_zones.available](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_zones) | data source |
 
@@ -129,16 +132,17 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_agent_additional_service_account_roles"></a> [agent\_additional\_service\_account\_roles](#input\_agent\_additional\_service\_account\_roles) | Additional roles to pass to the Agent service account | `list(string)` | `[]` | no |
 | <a name="input_cache_bucket_versioning"></a> [cache\_bucket\_versioning](#input\_cache\_bucket\_versioning) | Boolean used to enable versioning on the cache bucket, false by default. | `bool` | `false` | no |
 | <a name="input_cache_expiration_days"></a> [cache\_expiration\_days](#input\_cache\_expiration\_days) | Number of days before cache objects expires. | `number` | `2` | no |
 | <a name="input_cache_location"></a> [cache\_location](#input\_cache\_location) | The location where to create the cache bucket in. If not specified, it defaults to the region | `any` | `null` | no |
 | <a name="input_cache_shared"></a> [cache\_shared](#input\_cache\_shared) | Enables cache sharing between runners. | `bool` | `true` | no |
 | <a name="input_cache_storage_class"></a> [cache\_storage\_class](#input\_cache\_storage\_class) | The cache storage class | `string` | `"STANDARD"` | no |
 | <a name="input_create_cache_bucket"></a> [create\_cache\_bucket](#input\_create\_cache\_bucket) | Creates a cache cloud storage bucket if true | `bool` | `true` | no |
+| <a name="input_create_docker_machines_firewall"></a> [create\_docker\_machines\_firewall](#input\_create\_docker\_machines\_firewall) | Whether to create the docker-machines firewall. This is required for the runner to work. If deploying multiple runners in the same project, you can set this to false for one of the runners | `bool` | `true` | no |
 | <a name="input_docker_machine_disk_size"></a> [docker\_machine\_disk\_size](#input\_docker\_machine\_disk\_size) | The disk size for the docker-machine instances. | `number` | `20` | no |
 | <a name="input_docker_machine_disk_type"></a> [docker\_machine\_disk\_type](#input\_docker\_machine\_disk\_type) | The disk Type for docker-machine instances. | `string` | `"pd-standard"` | no |
 | <a name="input_docker_machine_download_url"></a> [docker\_machine\_download\_url](#input\_docker\_machine\_download\_url) | Full url pointing to a linux x64 distribution of docker machine. | `string` | `"https://gitlab-docker-machine-downloads.s3.amazonaws.com/main/docker-machine-Linux-x86_64"` | no |
-| <a name="input_docker_machine_image"></a> [docker\_machine\_image](#input\_docker\_machine\_image) | A GCP custom image to use for spinning up docker-machines | `string` | `""` | no |
 | <a name="input_docker_machine_machine_type"></a> [docker\_machine\_machine\_type](#input\_docker\_machine\_machine\_type) | The Machine Type for the docker-machine instances. | `string` | `"f1-micro"` | no |
 | <a name="input_docker_machine_options"></a> [docker\_machine\_options](#input\_docker\_machine\_options) | List of additional options for the docker machine config. Each element of this list must be a key=value pair. E.g. '["google-zone=a"]' | `list(string)` | `[]` | no |
 | <a name="input_docker_machine_preemptible"></a> [docker\_machine\_preemptible](#input\_docker\_machine\_preemptible) | If true, docker-machine instances will be premptible | `bool` | `false` | no |
@@ -152,6 +156,7 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 | <a name="input_project"></a> [project](#input\_project) | The GCP project to deploy the runner into. | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The GCP region to deploy the runner into. | `string` | n/a | yes |
 | <a name="input_runner_additional_service_account_roles"></a> [runner\_additional\_service\_account\_roles](#input\_runner\_additional\_service\_account\_roles) | Additional roles to pass to the Runner service account | `list(string)` | `[]` | no |
+| <a name="input_runner_machine_image"></a> [runner\_machine\_image](#input\_runner\_machine\_image) | A GCP custom image to use for spinning up runners when using docker-machine. The value can be in the form '{{project}}/{{region}}/images/family/{{name}}' or use 'cos-stable' for the latest image, see https://cloud.google.com/container-optimized-os/docs/release-notes | `string` | `"cos-stable"` | no |
 | <a name="input_runners_additional_volumes"></a> [runners\_additional\_volumes](#input\_runners\_additional\_volumes) | Additional volumes that will be used in the runner config.toml, e.g Docker socket | `list(any)` | `[]` | no |
 | <a name="input_runners_allow_ssh_access"></a> [runners\_allow\_ssh\_access](#input\_runners\_allow\_ssh\_access) | Enables SSH Access to the runner instances. | `bool` | `true` | no |
 | <a name="input_runners_concurrent"></a> [runners\_concurrent](#input\_runners\_concurrent) | Concurrent value for the runners, will be used in the runner config.toml. Limits how many jobs globally can be run concurrently when running docker-machine. | `number` | `10` | no |
@@ -199,5 +204,7 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_google_service_account_agent_name"></a> [google\_service\_account\_agent\_name](#output\_google\_service\_account\_agent\_name) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
