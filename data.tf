@@ -13,7 +13,8 @@ resource "random_id" "this" {
 }
 
 data "google_compute_network" "this" {
-  name = var.network
+  project = var.project
+  name    = var.network
 }
 
 data "google_compute_image" "cos_stable" {

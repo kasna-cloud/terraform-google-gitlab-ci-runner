@@ -80,6 +80,8 @@ resource "google_compute_instance_template" "this" {
   name_prefix = "${var.prefix}-gitlab-runner-"
   description = "This template is used to create Gitlab Runner instances."
 
+  project = var.project
+
   tags = distinct(concat([local.firewall_tag], var.runners_executor == "docker+machine" ? var.docker_machine_tags : var.runners_tags))
 
   labels = local.runners_labels
@@ -136,6 +138,8 @@ resource "google_compute_instance_template" "this" {
 
 
 resource "google_compute_region_instance_group_manager" "this" {
+  project = var.project
+
   # name = "${var.prefix}-gitlab-runner"
   name = substr("${var.prefix}-gitlab-runner-mig-${md5(google_compute_instance_template.this.name)}", 0, 50)
 
