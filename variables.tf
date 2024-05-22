@@ -80,9 +80,9 @@ variable "docker_machine_preemptible" {
 }
 
 variable "runner_machine_image" {
-  description = "A GCP custom image to use for spinning up runners when using docker-machine"
+  description = "A GCP custom image to use for spinning up runners when using docker-machine. The value can be in the form '{{project}}/{{region}}/images/family/{{name}}' or use 'cos-stable' for the latest image, see https://cloud.google.com/container-optimized-os/docs/release-notes"
   type        = string
-  default     = "cos-cloud/global/images/family/cos-97-lts"
+  default     = "cos-stable"
 }
 
 variable "docker_machine_disk_type" {

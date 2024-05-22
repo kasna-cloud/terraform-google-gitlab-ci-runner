@@ -3,6 +3,7 @@ resource "google_compute_firewall" "ssh" {
   name        = "${var.prefix}-gitlab-runner-allow-ssh"
   description = "Allow SSH to Runner instances"
   network     = data.google_compute_network.this.name
+  project     = var.project
 
   allow {
     protocol = "tcp"
@@ -18,6 +19,7 @@ resource "google_compute_firewall" "docker_machine" {
   name        = "docker-machines"
   description = "Allow docker-machine traffic within on port 2376"
   network     = data.google_compute_network.this.name
+  project     = var.project
 
   allow {
     protocol = "tcp"
@@ -28,17 +30,18 @@ resource "google_compute_firewall" "docker_machine" {
   target_tags = concat(["docker-machine", local.firewall_tag], var.runners_tags)
 }
 
-# Gitlab-Runner requires a firewall rule with name docker-machines to be created. 
-# However, when you have multiple deployments of the runner within different VPCs, issues arise 
+# Gitlab-Runner requires a firewall rule with name docker-machines to be created.
+# However, when you have multiple deployments of the runner within different VPCs, issues arise
 # because one firewall rule replaces the other since they have the same name. Creating another
 # specialized firewall rule here to ignore changes made to the docker-machine rule.
-# See https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/issues/47 and 
+# See https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/issues/47 and
 # https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/issues/55
 
 resource "google_compute_firewall" "docker_machines" {
   name        = "${var.prefix}-docker-machines"
   description = "Allow docker-machine traffic within on port 2376"
   network     = data.google_compute_network.this.name
+  project     = var.project
 
   allow {
     protocol = "tcp"
@@ -53,6 +56,7 @@ resource "google_compute_firewall" "docker_machine_ssh" {
   name        = "${var.prefix}-gitlab-runner-docker-machine-allow-ssh"
   description = "Allow ssh to docker-machine from runner "
   network     = data.google_compute_network.this.name
+  project     = var.project
 
   allow {
     protocol = "tcp"
@@ -67,6 +71,7 @@ resource "google_compute_firewall" "internet" {
   name        = "${var.prefix}-gitlab-runner-allow-internet"
   description = "Allow connection to internet"
   network     = data.google_compute_network.this.name
+  project     = var.project
 
   direction = "EGRESS"
   allow {
